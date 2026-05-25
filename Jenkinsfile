@@ -6,7 +6,13 @@ pipeline {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
                 sh '''
-                    docker run --rm -v \$(pwd):/apps -w /apps python:3.10-slim sh -c "
+                    # Dynamically target the exact physical workspace path on the Ubuntu host
+                    HOST_WORKSPACE="/var/lib/docker/volumes/jenkins_home/_data/workspace/${JOB_NAME}"
+                    
+                    docker run --rm \
+                      -v "${HOST_WORKSPACE}":/apps \
+                      -w /apps \
+                      python:3.10-slim sh -c "
                     echo 'Installing code quality framework...' && \
                     pip install --quiet flake8 && \
                     echo 'Running strict syntax compliance checks...' && \
@@ -21,21 +27,21 @@ pipeline {
         stage('Build Image') {
             steps {
                 echo 'Building application Docker image...'
-                // Your Docker build steps go here
+                // Future build steps go here
             }
         }
 
         stage('Integration Testing') {
             steps {
                 echo 'Running test suites...'
-                // Your test runner steps go here
+                // Future test runner steps go here
             }
         }
 
         stage('Rolling Deployment') {
             steps {
                 echo 'Deploying application to production environments...'
-                // Your deployment scripts go here
+                // Future deployment scripts go here
             }
         }
     }
