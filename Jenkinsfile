@@ -1,4 +1,8 @@
-stage('Code Quality Audit') {
+pipeline {
+    agent any
+
+    stages {
+        stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
                 sh '''
@@ -13,3 +17,26 @@ stage('Code Quality Audit') {
                 echo 'Code quality audit passed successfully!'
             }
         }
+
+        stage('Build Image') {
+            steps {
+                echo 'Building application Docker image...'
+                // Your Docker build steps go here
+            }
+        }
+
+        stage('Integration Testing') {
+            steps {
+                echo 'Running test suites...'
+                // Your test runner steps go here
+            }
+        }
+
+        stage('Rolling Deployment') {
+            steps {
+                echo 'Deploying application to production environments...'
+                // Your deployment scripts go here
+            }
+        }
+    }
+}
