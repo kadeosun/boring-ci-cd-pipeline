@@ -1,0 +1,19 @@
+# Exclude Python binaries and local testing outputs
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Block credentials and secrets 
+*.pem
+*.key
+*.pub
+secret/
+credentials/
+.env
+.env.*
+
+# Block localized system tracker patterns
+.DS_Store
+Thumbs.db
+.jenkins/
