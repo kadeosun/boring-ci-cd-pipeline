@@ -49,13 +49,14 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // This runs the official docker/compose image to deploy
-                    // -v /var/run/docker.sock maps the host docker to the container
-                    // -v ${WORKSPACE}:/app maps your code to the container
+                    // Debug: Verify the file exists
+                    sh "ls -la docker-compose.yml"
+                    
+                    // Use the fully qualified path from the Jenkins environment
                     sh """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v ${WORKSPACE}:/app \
+                        -v ${env.WORKSPACE}:/app \
                         -w /app \
                         docker/compose:latest -f docker-compose.yml up -d
                     """
