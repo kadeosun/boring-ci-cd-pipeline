@@ -11,10 +11,9 @@ pipeline {
         stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
-                // Using explicit double-quotes for the shell block 
-                // and ensuring the path is mounted absolutely.
                 sh """
-                    docker run --rm -v "${WORKSPACE}:/apps" -w /apps python:3.10-slim sh -c \
+                    docker build -t lint-test:${BUILD_NUMBER} .
+                    docker run --rm lint-test:${BUILD_NUMBER} sh -c \
                     "pip install --quiet flake8 && \
                     flake8 app.py --count --select=E9,F63,F7,F82 --show-source --statistics && \
                     flake8 app.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics"
@@ -25,9 +24,7 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 script {
-                    echo "Building image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
-                    
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
                                                       usernameVariable: 'DOCKER_USR', 
                                                       passwordVariable: 'DOCKER_PSW')]) {
