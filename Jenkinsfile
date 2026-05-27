@@ -1,4 +1,4 @@
-kpipeline {
+pipeline {
     agent any
 
     environment {
@@ -49,13 +49,9 @@ kpipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    
-                    // 1. Verify file existence before deploying
-                    sh "ls -la docker-compose.yml"
-                    
-                    // 2. Use native docker compose (V2 plugin) 
-                    // This uses the current directory context automatically
-                    sh "docker compose up -d"
+                    // Pass the IMAGE_TAG variable directly to the compose command
+                    // so the docker-compose.yml file can resolve the image correctly.
+                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose up -d"
                 }
             }
         }
