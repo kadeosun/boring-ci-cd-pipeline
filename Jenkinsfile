@@ -49,9 +49,8 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // We use an explicit sh call that handles the environment variable
-                    // and uses the standalone command path.
-                    sh "IMAGE_TAG=${IMAGE_TAG} docker-compose up --detach"
+                    // This uses the native Docker CLI plugin, which is present in your environment
+                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose -f docker-compose.yml up -d"
                 }
             }
         }
