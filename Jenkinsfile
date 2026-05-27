@@ -1,4 +1,4 @@
-pipeline {
+kpipeline {
     agent any
 
     environment {
@@ -49,13 +49,13 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    sh """
-                        docker run --rm \
-                        -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v /var/jenkins_home/workspace/boring-app-final-pipeline:/app \
-                        -w /app \
-                        docker/compose:latest -f docker-compose.yml up -d
-                    """
+                    
+                    // 1. Verify file existence before deploying
+                    sh "ls -la docker-compose.yml"
+                    
+                    // 2. Use native docker compose (V2 plugin) 
+                    // This uses the current directory context automatically
+                    sh "docker compose up -d"
                 }
             }
         }
