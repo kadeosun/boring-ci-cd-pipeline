@@ -1,8 +1,14 @@
-version: '3.8'
 services:
+  # The application service
   app:
-    build: .
-    volumes:
-      - .:/app
+    # Use the environment variable to pull the specific version. 
+    # If IMAGE_TAG is not set (running manually), it defaults to 'latest'.
+    image: boring-app:${IMAGE_TAG:-latest}
+    container_name: boring-app-container
+    ports:
+      - "5000:5000"
+    restart: always
     environment:
-      - PYTHONUNBUFFERED=1
+      - ENV=production
+
+  # Optional: Add a database or other dependencies here in the future
