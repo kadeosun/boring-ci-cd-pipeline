@@ -11,9 +11,10 @@ pipeline {
         stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
+                // Added '-u 0' to run as root and bypass permission issues
                 sh """
                     docker build -t lint-test:${BUILD_NUMBER} .
-                    docker run --rm lint-test:${BUILD_NUMBER} sh -c \
+                    docker run --rm -u 0 lint-test:${BUILD_NUMBER} sh -c \
                     "pip install --quiet flake8 && \
                     flake8 app.py --count --select=E9,F63,F7,F82 --show-source --statistics && \
                     flake8 app.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics"
