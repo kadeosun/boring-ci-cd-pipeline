@@ -1,4 +1,4 @@
-pipeline {
+kpipeline {
     agent any
 
     environment {
@@ -48,10 +48,20 @@ pipeline {
         stage('Rolling Deployment') {
             steps {
                 script {
-                    echo "Deploying version ${IMAGE_TAG}..."
-                    // Pass the IMAGE_TAG variable directly to the compose command
-                    // so the docker-compose.yml file can resolve the image correctly.
-                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose up -d"
+                    echo "Directly deploying image: kadeosun/boring-app:${IMAGE_TAG}"
+                    sh """
+                        # Stop and remove the existing container if it exists
+                        docker stop boring-app-container || true
+                        docker rm boring-app-container || true
+                        
+                        # Start the new container with the latest build
+                        docker run -d \
+                        --name boring-app-container \
+                        -p 5000:5000 \
+                        --restart always \
+                        -e ENV=production \
+                        kadeosun/boring-app:${IMAGE_TAG}
+                    """
                 }
             }
         }
