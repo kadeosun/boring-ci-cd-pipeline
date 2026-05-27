@@ -11,7 +11,7 @@ pipeline {
         stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
-                // Added '-u 0' to run as root and bypass permission issues
+                // Using -u 0 to run as root and avoid permission issues
                 sh """
                     docker build -t lint-test:${BUILD_NUMBER} .
                     docker run --rm -u 0 lint-test:${BUILD_NUMBER} sh -c \
@@ -25,7 +25,9 @@ pipeline {
         stage('Build and Push Image') {
             steps {
                 script {
+                    echo "Building image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
                                                       usernameVariable: 'DOCKER_USR', 
                                                       passwordVariable: 'DOCKER_PSW')]) {
@@ -48,7 +50,8 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    sh "IMAGE_TAG=${IMAGE_TAG} docker-compose up -d"
+                    // Using 'docker compose' (V2) which is built into the CLI
+                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose up -d"
                 }
             }
         }
