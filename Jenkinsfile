@@ -11,7 +11,6 @@ pipeline {
         stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
-                // Using -u 0 to run as root and avoid permission issues
                 sh """
                     docker build -t lint-test:${BUILD_NUMBER} .
                     docker run --rm -u 0 lint-test:${BUILD_NUMBER} sh -c \
@@ -50,8 +49,12 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // Using 'docker compose' (V2) which is built into the CLI
-                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose up -d"
+                    // We use an explicit shell block with a 'set -x' to debug and 
+                    // a more robust command syntax
+                    sh """
+                        export IMAGE_TAG=${IMAGE_TAG}
+                        docker-compose up -d
+                    """
                 }
             }
         }
