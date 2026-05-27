@@ -49,14 +49,13 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // Use absolute path /app/docker-compose.yml inside the container 
-                    // since we mapped the workspace to /app
+                    // We use $PWD to map the current workspace root directly
                     sh """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
-                        -v ${env.WORKSPACE}:/app \
+                        -v $PWD:/app \
                         -w /app \
-                        docker/compose:latest -f /app/docker-compose.yml up -d
+                        docker/compose:latest up -d
                     """
                 }
             }
