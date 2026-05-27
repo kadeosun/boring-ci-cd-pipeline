@@ -79,17 +79,19 @@ pipeline {
             steps {
                 script {
                     echo 'Performing deep cleanup of build artifacts...'
-                    sh """
-                        # 1. Remove all kadeosun/boring-app images EXCEPT the current one
-                        CURRENT_TAG="${IMAGE_TAG}"
+                    // Using triple-single-quotes ''' avoids Groovy variable interpolation
+                    sh '''
+                        CURRENT_TAG="${BUILD_NUMBER}"
+                        
+                        # 1. Remove old kadeosun/boring-app images
                         docker images --format "{{.Repository}}:{{.Tag}}" | grep "kadeosun/boring-app" | grep -v ":${CURRENT_TAG}" | xargs -r docker rmi || true
                         
-                        # 2. Remove all lint-test images EXCEPT the current one
+                        # 2. Remove old lint-test images
                         docker images --format "{{.Repository}}:{{.Tag}}" | grep "lint-test" | grep -v ":${CURRENT_TAG}" | xargs -r docker rmi || true
                         
-                        # 3. Final safety prune for any truly orphaned layers
+                        # 3. Final safety prune
                         docker image prune -f
-                    """
+                    '''
                 }
             }
         }
