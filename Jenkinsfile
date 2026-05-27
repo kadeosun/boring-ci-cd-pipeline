@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    // Forces a clean checkout every time
+    options {
+        skipDefaultCheckout()
+    }
+
     environment {
         DOCKER_USER = 'kadeosun'
         IMAGE_NAME  = 'boring-app'
@@ -8,6 +13,13 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                checkout scm
+            }
+        }
+
         stage('Code Quality Audit') {
             steps {
                 echo 'Executing Enterprise Static Code Analysis...'
@@ -52,9 +64,12 @@ pipeline {
                     sh """
                         # Stop and remove the existing container if it exists
                         docker stop boring-app-container || true
-                        docker rm boring-app-container || true
+                        docker rm -f boring-app-container || true
                         
-                        # Start the new container with the latest build
+                        # Add a tiny sleep to ensure the filesystem metadata is updated
+                        sleep 2
+                        
+                        # Start the new container
                         docker run -d \
                         --name boring-app-container \
                         -p 5000:5000 \
@@ -63,6 +78,13 @@ pipeline {
                         kadeosun/boring-app:${IMAGE_TAG}
                     """
                 }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning up dangling images...'
+                sh 'docker image prune -f'
             }
         }
     }
