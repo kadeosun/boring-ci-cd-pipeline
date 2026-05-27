@@ -49,11 +49,10 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // We use an explicit shell block with a 'set -x' to debug and 
-                    // a more robust command syntax
+                    // We use 'docker compose' (no hyphen) which is the modern plugin
                     sh """
                         export IMAGE_TAG=${IMAGE_TAG}
-                        docker-compose up -d
+                        docker compose up -d
                     """
                 }
             }
