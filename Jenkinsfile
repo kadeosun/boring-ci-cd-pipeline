@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-    // Forces a clean checkout every time
     options {
         skipDefaultCheckout()
     }
@@ -62,14 +61,9 @@ pipeline {
                 script {
                     echo "Directly deploying image: kadeosun/boring-app:${IMAGE_TAG}"
                     sh """
-                        # Stop and remove the existing container if it exists
                         docker stop boring-app-container || true
                         docker rm -f boring-app-container || true
-                        
-                        # Add a tiny sleep to ensure the filesystem metadata is updated
                         sleep 2
-                        
-                        # Start the new container
                         docker run -d \
                         --name boring-app-container \
                         -p 5000:5000 \
@@ -83,8 +77,20 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                echo 'Cleaning up dangling images...'
-                sh 'docker image prune -f'
+                script {
+                    echo 'Performing deep cleanup of build artifacts...'
+                    sh """
+                        # 1. Remove all kadeosun/boring-app images EXCEPT the current one
+                        CURRENT_TAG="${IMAGE_TAG}"
+                        docker images --format "{{.Repository}}:{{.Tag}}" | grep "kadeosun/boring-app" | grep -v ":${CURRENT_TAG}" | xargs -r docker rmi || true
+                        
+                        # 2. Remove all lint-test images EXCEPT the current one
+                        docker images --format "{{.Repository}}:{{.Tag}}" | grep "lint-test" | grep -v ":${CURRENT_TAG}" | xargs -r docker rmi || true
+                        
+                        # 3. Final safety prune for any truly orphaned layers
+                        docker image prune -f
+                    """
+                }
             }
         }
     }
