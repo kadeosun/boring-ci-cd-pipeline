@@ -49,16 +49,14 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // Debug: Verify the file exists
-                    sh "ls -la docker-compose.yml"
-                    
-                    // Use the fully qualified path from the Jenkins environment
+                    // Use absolute path /app/docker-compose.yml inside the container 
+                    // since we mapped the workspace to /app
                     sh """
                         docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v ${env.WORKSPACE}:/app \
                         -w /app \
-                        docker/compose:latest -f docker-compose.yml up -d
+                        docker/compose:latest -f /app/docker-compose.yml up -d
                     """
                 }
             }
