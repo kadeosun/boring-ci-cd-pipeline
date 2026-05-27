@@ -49,11 +49,9 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // We use 'docker compose' (no hyphen) which is the modern plugin
-                    sh """
-                        export IMAGE_TAG=${IMAGE_TAG}
-                        docker compose up -d
-                    """
+                    // We use an explicit sh call that handles the environment variable
+                    // and uses the standalone command path.
+                    sh "IMAGE_TAG=${IMAGE_TAG} docker-compose up --detach"
                 }
             }
         }
