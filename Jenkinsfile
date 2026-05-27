@@ -49,8 +49,16 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
-                    // This uses the native Docker CLI plugin, which is present in your environment
-                    sh "IMAGE_TAG=${IMAGE_TAG} docker compose -f docker-compose.yml up -d"
+                    // This runs the official docker/compose image to deploy
+                    // -v /var/run/docker.sock maps the host docker to the container
+                    // -v ${WORKSPACE}:/app maps your code to the container
+                    sh """
+                        docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v ${WORKSPACE}:/app \
+                        -w /app \
+                        docker/compose:latest -f docker-compose.yml up -d
+                    """
                 }
             }
         }
