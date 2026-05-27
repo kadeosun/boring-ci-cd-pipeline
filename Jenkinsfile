@@ -10,7 +10,11 @@ pipeline {
     stages {
         stage('Code Quality Audit') {
             steps {
+                echo 'Listing files in workspace...'
+                sh 'ls -F'
+                
                 echo 'Executing Enterprise Static Code Analysis...'
+                // Ensure we mount the workspace correctly
                 sh """
                     docker run --rm -v ${WORKSPACE}:/apps -w /apps python:3.10-slim sh -c \
                     "pip install --quiet flake8 && \
@@ -49,6 +53,7 @@ pipeline {
             steps {
                 script {
                     echo "Deploying version ${IMAGE_TAG}..."
+                    // Pass the tag to docker-compose
                     sh "IMAGE_TAG=${IMAGE_TAG} docker-compose up -d"
                 }
             }
